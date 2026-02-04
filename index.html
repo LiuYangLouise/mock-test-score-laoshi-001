@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reborner模考反馈系统 - 老师端</title>
+    <style>
+        :root {
+            --primary-bg: #FFFAF6;
+            --primary-color: #004132;
+            --accent-color: #0068BA;
+            --highlight-color: #00A8E9;
+            --card-bg: #FFFFFF;
+            --border-color: #E0E0E0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --success-color: #46B065;
+            --warning-color: #FFBF36;
+            --header-bg: linear-gradient(135deg, #0068BA, #00A8E9);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--primary-color);
+            line-height: 1.6;
+            padding-bottom: 40px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 背景装饰元素 */
+        .bg-decoration {
+            position: fixed;
+            border-radius: 50%;
+            opacity: 0.15;
+            z-index: -1;
+            filter: blur(40px);
+        }
+
+        .bg-circle-1 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #0068BA, #00A8E9);
+            top: 5%;
+            left: 5%;
+        }
+
+        .bg-circle-2 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #91D5F1, #CFDFEF);
+            bottom: 10%;
+            right: 5%;
+        }
+
+        .bg-circle-3 {
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(135deg, #F1BB3E, #FFBF36);
+            top: 60%;
+            left: 80%;
+        }
+
+        /* 顶部区域 - 立体卡片效果 */
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            margin: 30px auto 40px;
+            max-width: 900px;
+            border-radius: 20px;
+            background: var(--header-bg);
+            box-shadow: 
+                0 10px 30px rgba(0, 104, 186, 0.3),
+                0 6px 10px rgba(0, 104, 186, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        }
+
+        .main-title {
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .date-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .slogan {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        /* 总分和科目概览 */
+        .score-overview {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin: 0 auto 30px;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        .overview-title {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .scores-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 25px;
+            border-radius: 12px;
+            background-color: #F8F9FA;
+            min-width: 120px;
+            transition: transform 0.3s ease;
+        }
+
+        .score-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .total-score {
+            background-color: #E8F4FD;
+            border: 2px solid var(--highlight-color);
+        }
+
+        .score-label {
+            font-size: 1rem;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .total-score .score-value {
+            color: #B60000;
+            font-size: 2.2rem;
+        }
+
+        /* 说明区域 */
+        .instructions {
+            background-color: #F8F9FA;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 0 auto 30px;
+            max-width: 900px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .instructions h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .steps {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .steps li {
+            margin-bottom: 10px;
+        }
+
+        .format-example {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        /* 操作按钮区域 */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 0 auto 30px;
+            max-width: 900px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--highlight-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 104, 186, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: #F1F3F5;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #E9ECEF;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #3A9E55;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(70, 176, 101, 0.2);
+        }
+
+        /* 科目卡片区域 */
+        .subjects-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .subject-card {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .subject-name {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .subject-score {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            background-color: #F0F7FF;
+            padding: 8px 18px;
+            border-radius: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 104, 186, 0.1);
+        }
+
+        /* 配色方案选择器 */
+        .color-scheme-selector {
+            max-width: 900px;
+            margin: 20px auto 30px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .color-scheme-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .color-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .color-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .color-option:hover {
+            background-color: #F8F9FA;
+        }
+
+        .color-option.selected {
+            border-color: var(--accent-color);
+            background-color: #F0F7FF;
+        }
+
+        .color-preview {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+        }
+
+        .color-name {
+            font-weight: 500;
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px 20px;
+            color: var(--primary-color);
+            font-size: 0.95rem;
+        }
+
+        .footer-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        /* 学生端特定样式 */
+        body.student-view .teacher-only,
+        body.student-view .action-buttons,
+        body.student-view .instructions,
+        body.student-view .color-scheme-selector {
+            display: none !important;
+        }
+
+        body.student-view .input-field {
+            background-color: #F9F9F9;
+            cursor: default;
+        }
+
+        /* 隐藏空的内容 */
+        .teacher-words-empty {
+            display: none;
+        }
+
+        /* 模态窗口 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2rem;
+            }
+            
+            .header {
+                margin: 20px 15px 30px;
+                padding: 20px 15px;
+            }
+            
+            .scores-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .score-item {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .subject-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .color-options {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景装饰元素 -->
+    <div class="bg-decoration bg-circle-1"></div>
+    <div class="bg-decoration bg-circle-2"></div>
+    <div class="bg-decoration bg-circle-3"></div>
+
+    <!-- 顶部区域 -->
+    <div class="header">
+        <h1 class="main-title" id="mainTitle">Reborner <span id="studentName">某某</span> 今日的模考</h1>
+        <div class="date-subtitle" id="currentDate"></div>
+        <div class="slogan">天天进步，每日新生</div>
+    </div>
+
+    <!-- 总分和科目概览 -->
+    <div class="score-overview">
+        <div class="overview-title">模考成绩概览</div>
+        <div class="scores-container" id="scoresContainer">
+            <!-- 动态生成 -->
+        </div>
+    </div>
+
+    <!-- 说明区域（仅老师端可见） -->
+    <div class="instructions teacher-only">
+        <h3>使用说明</h3>
+        <ol class="steps">
+            <li>修改学生姓名：点击上方"修改学生姓名"按钮</li>
+            <li>导入模考数据：支持txt、excel、word格式，格式如右侧示例</li>
+            <li>编辑科目评价：在下方科目卡片中输入框内编辑"老师的话"</li>
+            <li>保存与导出：点击"保存记录"保存到本地，点击"导出Word"生成文档</li>
+            <li>切换视图：点击"查看学生端"预览学生看到的效果</li>
+        </ol>
+        <div class="format-example">
+总分
+6.0
+
+听力
+7.0
+
+阅读
+5.5
+
+写作
+6.0
+
+口语
+6.0
+
+加试
+        </div>
+    </div>
+
+    <!-- 操作按钮区域（仅老师端可见） -->
+    <div class="action-buttons teacher-only">
+        <button class="btn btn-primary" id="changeNameBtn">修改学生姓名</button>
+        <button class="btn btn-primary" id="importDataBtn">导入模考数据</button>
+        <button class="btn btn-success" id="saveRecordBtn">保存今日记录</button>
+        <button class="btn btn-success" id="exportWordBtn">导出Word文档</button>
+        <button class="btn btn-secondary" id="resetBtn">重置所有记录</button>
+        <button class="btn btn-secondary" id="studentViewBtn">查看学生端</button>
+        <button class="btn btn-secondary" id="teacherViewBtn" style="display:none;">返回老师端</button>
+    </div>
+
+    <!-- 配色方案选择器（仅老师端可见） -->
+    <div class="color-scheme-selector teacher-only">
+        <div class="color-scheme-title">选择配色方案</div>
+        <div class="color-options">
+            <div class="color-option selected" data-scheme="blue">
+                <div class="color-preview" style="background: linear-gradient(135deg, #0068BA, #00A8E9);"></div>
+                <div class="color-name">蓝调时光</div>
+            </div>
+            <div class="color-option" data-scheme="warm">
+                <div class="color-preview" style="background: linear-gradient(135deg, #ED5E46, #E6A350);"></div>
+                <div class="color-name">暖暖阳光</div>
+            </div>
+            <div class="color-option" data-scheme="green">
+                <div class="color-preview" style="background: linear-gradient(135deg, #8CB818, #46B065);"></div>
+                <div class="color-name">万物新生</div>
+            </div>
+            <div class="color-option" data-scheme="red">
+                <div class="color-preview" style="background: linear-gradient(135deg, #B60000, #FFBF36);"></div>
+                <div class="color-name">欢庆时刻</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 科目卡片区域 -->
+    <div class="subjects-container" id="subjectsContainer">
+        <!-- 动态生成 -->
+    </div>
+
+    <!-- 页脚 -->
+    <div class="footer">
+        <div class="footer-text">
+            Reborner<br>记录点滴进步，成就更好的自己
+        </div>
+        <div>模考反馈系统</div>
+    </div>
+
+    <!-- 修改姓名模态窗口 -->
+    <div class="modal" id="nameModal">
+        <div class="modal-content">
+            <h3 class="modal-title">修改学生姓名</h3>
+            <input type="text" class="modal-input" id="nameInput" placeholder="请输入学生姓名" value="某某">
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="cancelNameBtn">取消</button>
+                <button class="btn btn-primary" id="confirmNameBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 文件导入模态窗口 -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <h3 class="modal-title">导入模考数据</h3>
+            <input type="file" class="modal-input" id="fileInput" accept=".txt,.csv,.xlsx,.doc,.docx">
+            <p style="margin-bottom: 20px; color: #666; font-size: 0.9rem;">支持txt、excel、word格式文件，请确保格式正确</p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="cancelImportBtn">取消</button>
+                <button class="btn btn-primary" id="confirmImportBtn">导入</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取当前日期
+        function getCurrentDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+            const weekday = weekdays[now.getDay()];
+            
+            return `${year}年${month}月${day}日 ${weekday}`;
+        }
+
+        // 设置当前日期
+        document.getElementById('currentDate').textContent = getCurrentDate();
+
+        // 初始化数据
+        let studentName = '某某';
+        let subjects = [];
+        let colorScheme = 'blue';
+
+        // 示例数据（从txt文件解析而来）
+        const exampleData = {
+            '总分': '6.0',
+            '听力': '7.0',
+            '阅读': '5.5',
+            '写作': '6.0',
+            '口语': '6.0'
+        };
+
+        // 初始化科目数据
+        function initSubjects() {
+            subjects = [];
+            for (const [name, score] of Object.entries(exampleData)) {
+                subjects.push({
+                    name: name,
+                    score: score,
+                    teacherWords: ''
+                });
+            }
+            renderScoreOverview();
+            renderSubjectCards();
+        }
+
+        // 渲染分数概览
+        function renderScoreOverview() {
+            const container = document.getElementById('scoresContainer');
+            container.innerHTML = '';
+            
+            // 添加总分
+            const totalScore = subjects.find(s => s.name === '总分');
+            if (totalScore) {
+                const totalElement = document.createElement('div');
+                totalElement.className = 'score-item total-score';
+                totalElement.innerHTML = `
+                    <div class="score-label">总分</div>
+                    <div class="score-value">${totalScore.score}</div>
+                `;
+                container.appendChild(totalElement);
+            }
+            
+            // 添加其他科目（排除总分）
+            subjects.forEach(subject => {
+                if (subject.name !== '总分') {
+                    const scoreElement = document.createElement('div');
+                    scoreElement.className = 'score-item';
+                    scoreElement.innerHTML = `
+                        <div class="score-label">${subject.name}</div>
+                        <div class="score-value">${subject.score}</div>
+                    `;
+                    container.appendChild(scoreElement);
+                }
+            });
+        }
+
+        // 渲染科目卡片
+        function renderSubjectCards() {
+            const container = document.getElementById('subjectsContainer');
+            container.innerHTML = '';
+            
+            // 排除总分科目
+            const displaySubjects = subjects.filter(s => s.name !== '总分');
+            
+            displaySubjects.forEach((subject, index) => {
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                card.innerHTML = `
+                    <div class="subject-header">
+                        <div class="subject-name">${subject.name}</div>
+                        <div class="subject-score">${subject.score}</div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">老师的话</label>
+                        <textarea class="input-field" placeholder="请输入老师的话..." data-subject="${subject.name}" data-field="teacherWords">${subject.teacherWords}</textarea>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            // 为输入框添加事件监听
+            document.querySelectorAll('.input-field').forEach(input => {
+                input.addEventListener('input', function() {
+                    const subjectName = this.dataset.subject;
+                    const field = this.dataset.field;
+                    const subject = subjects.find(s => s.name === subjectName);
+                    if (subject) {
+                        subject[field] = this.value;
+                    }
+                });
+            });
+        }
+
+        // 修改学生姓名
+        document.getElementById('changeNameBtn').addEventListener('click', function() {
+            document.getElementById('nameModal').style.display = 'flex';
+            document.getElementById('nameInput').value = studentName;
+        });
+
+        document.getElementById('cancelNameBtn').addEventListener('click', function() {
+            document.getElementById('nameModal').style.display = 'none';
+        });
+
+        document.getElementById('confirmNameBtn').addEventListener('click', function() {
+            const newName = document.getElementById('nameInput').value.trim();
+            if (newName) {
+                studentName = newName;
+                document.getElementById('studentName').textContent = studentName;
+                document.getElementById('nameModal').style.display = 'none';
+            }
+        });
+
+        // 文件导入功能
+        document.getElementById('importDataBtn').addEventListener('click', function() {
+            document.getElementById('importModal').style.display = 'flex';
+        });
+
+        document.getElementById('cancelImportBtn').addEventListener('click', function() {
+            document.getElementById('importModal').style.display = 'none';
+        });
+
+        document.getElementById('confirmImportBtn').addEventListener('click', function() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert('请选择文件');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const content = e.target.result;
+                parseFileContent(content, file.name);
+                document.getElementById('importModal').style.display = 'none';
+            };
+            
+            if (file.name.endsWith('.txt')) {
+                reader.readAsText(file);
+            } else {
+                alert('目前仅支持txt文件导入，excel和word导入功能需后端支持');
+                document.getElementById('importModal').style.display = 'none';
+            }
+        });
+
+        // 解析文件内容
+        function parseFileContent(content, fileName) {
+            // 简单的txt解析逻辑
+            const lines = content.split('\n');
+            const newSubjects = [];
+            let currentSubject = null;
+            let currentField = 'score'; // score 或 teacherWords
+            
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) {
+                    // 空行表示科目结束或字段切换
+                    if (currentSubject && currentField === 'score') {
+                        currentField = 'teacherWords';
+                    }
+                    return;
+                }
+                
+                // 检查是否是科目名称（如果下一行是分数）
+                const isScore = /^\d+(\.\d+)?$/.test(trimmedLine);
+                
+                if (!isScore && !currentSubject) {
+                    // 开始新科目
+                    currentSubject = {
+                        name: trimmedLine,
+                        score: '',
+                        teacherWords: ''
+                    };
+                    currentField = 'score';
+                } else if (currentSubject) {
+                    // 根据当前字段处理内容
+                    if (currentField === 'score' && /^\d+(\.\d+)?$/.test(trimmedLine)) {
+                        currentSubject.score = trimmedLine;
+                    } else if (currentField === 'teacherWords') {
+                        // 添加老师的话
+                        if (currentSubject.teacherWords) {
+                            currentSubject.teacherWords += '\n' + trimmedLine;
+                        } else {
+                            currentSubject.teacherWords = trimmedLine;
+                        }
+                    }
+                }
+            });
+            
+            // 完成最后一个科目
+            if (currentSubject && currentSubject.score) {
+                newSubjects.push(currentSubject);
+            }
+            
+            // 过滤掉没有分数的科目（如"加试"）
+            const validSubjects = newSubjects.filter(s => s.score);
+            
+            if (validSubjects.length > 0) {
+                subjects = validSubjects;
+                renderScoreOverview();
+                renderSubjectCards();
+                alert(`成功导入${validSubjects.length}个科目数据`);
+            } else {
+                alert('未能解析到有效的科目数据，请检查文件格式');
+            }
+        }
+
+        // 保存记录到本地存储
+        document.getElementById('saveRecordBtn').addEventListener('click', function() {
+            const record = {
+                studentName: studentName,
+                date: getCurrentDate(),
+                subjects: subjects,
+                colorScheme: colorScheme
+            };
+            
+            localStorage.setItem('rebornerExamRecord', JSON.stringify(record));
+            alert('记录已保存到本地存储');
+        });
+
+        // 导出Word文档
+        document.getElementById('exportWordBtn').addEventListener('click', function() {
+            exportToWord();
+        });
+
+        // 导出Word功能
+        function exportToWord() {
+            // 创建Word文档内容
+            let content = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    <title>Reborner ${studentName} 模考反馈</title>
+                    <style>
+                        body { font-family: 'Microsoft YaHei', sans-serif; margin: 20px; }
+                        h1 { font-size: 28pt; text-align: center; margin-bottom: 10px; }
+                        .date { font-size: 16pt; text-align: center; margin-bottom: 30px; color: #666; }
+                        .subject { margin-bottom: 25px; }
+                        .subject-name { font-size: 16pt; font-weight: bold; color: #2E74B5; }
+                        .subject-score { font-size: 14pt; margin: 5px 0 15px 0; }
+                        .teacher-words { font-size: 14pt; margin-top: 10px; }
+                        .footer { text-align: center; margin-top: 50px; font-size: 12pt; line-height: 1.5; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Reborner ${studentName} 今日的模考</h1>
+                    <div class="date">${getCurrentDate()}</div>
+            `;
+            
+            // 添加科目内容
+            subjects.forEach(subject => {
+                if (subject.name !== '总分') {
+                    content += `
+                        <div class="subject">
+                            <div class="subject-name">${subject.name}</div>
+                            <div class="subject-score">分数: ${subject.score}</div>
+                    `;
+                    
+                    // 只在有老师的话时才显示
+                    if (subject.teacherWords && subject.teacherWords.trim()) {
+                        content += `
+                            <div class="teacher-words">${subject.teacherWords}</div>
+                        `;
+                    }
+                    
+                    content += `</div>`;
+                }
+            });
+            
+            // 添加总分
+            const totalScore = subjects.find(s => s.name === '总分');
+            if (totalScore) {
+                content += `
+                    <div class="subject">
+                        <div class="subject-name">总分</div>
+                        <div class="subject-score">${totalScore.score}</div>
+                `;
+                
+                // 只在有老师的话时才显示
+                if (totalScore.teacherWords && totalScore.teacherWords.trim()) {
+                    content += `
+                        <div class="teacher-words">${totalScore.teacherWords}</div>
+                    `;
+                }
+                
+                content += `</div>`;
+            }
+            
+            // 添加页脚
+            content += `
+                    <div class="footer">
+                        Reborner<br>记录点滴进步，成就更好的自己
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            // 创建Blob并下载
+            const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Reborner_${studentName}_模考反馈_${new Date().toISOString().split('T')[0]}.doc`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // 重置所有记录
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            if (confirm('确定要重置所有记录吗？这将清除所有输入内容。')) {
+                studentName = '某某';
+                document.getElementById('studentName').textContent = studentName;
+                initSubjects();
+                document.getElementById('fileInput').value = '';
+                alert('所有记录已重置');
+            }
+        });
+
+        // 切换学生端视图
+        document.getElementById('studentViewBtn').addEventListener('click', function() {
+            document.body.classList.add('student-view');
+            document.getElementById('studentViewBtn').style.display = 'none';
+            document.getElementById('teacherViewBtn').style.display = 'inline-block';
+            
+            // 在学生端视图中，隐藏空的"老师的话"部分
+            document.querySelectorAll('.input-group').forEach(group => {
+                const textarea = group.querySelector('.input-field');
+                if (textarea && !textarea.value.trim()) {
+                    group.style.display = 'none';
+                }
+            });
+        });
+
+        // 切换老师端视图
+        document.getElementById('teacherViewBtn').addEventListener('click', function() {
+            document.body.classList.remove('student-view');
+            document.getElementById('teacherViewBtn').style.display = 'none';
+            document.getElementById('studentViewBtn').style.display = 'inline-block';
+            
+            // 恢复所有输入框的显示
+            document.querySelectorAll('.input-group').forEach(group => {
+                group.style.display = 'block';
+            });
+        });
+
+        // 配色方案切换
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                colorScheme = this.dataset.scheme;
+                applyColorScheme(colorScheme);
+            });
+        });
+
+        // 应用配色方案
+        function applyColorScheme(scheme) {
+            const root = document.documentElement;
+            
+            switch(scheme) {
+                case 'blue':
+                    root.style.setProperty('--primary-bg', '#FFFAF6');
+                    root.style.setProperty('--primary-color', '#004132');
+                    root.style.setProperty('--accent-color', '#0068BA');
+                    root.style.setProperty('--highlight-color', '#00A8E9');
+                    root.style.setProperty('--success-color', '#46B065');
+                    root.style.setProperty('--header-bg', 'linear-gradient(135deg, #0068BA, #00A8E9)');
+                    break;
+                    
+                case 'warm':
+                    root.style.setProperty('--primary-bg', '#FFF7E9');
+                    root.style.setProperty('--primary-color', '#7D3A18');
+                    root.style.setProperty('--accent-color', '#ED5E46');
+                    root.style.setProperty('--highlight-color', '#E6A350');
+                    root.style.setProperty('--success-color', '#E6A350');
+                    root.style.setProperty('--header-bg', 'linear-gradient(135deg, #ED5E46, #E6A350)');
+                    break;
+                    
+                case 'green':
+                    root.style.setProperty('--primary-bg', '#FFFBE2');
+                    root.style.setProperty('--primary-color', '#004132');
+                    root.style.setProperty('--accent-color', '#8CB818');
+                    root.style.setProperty('--highlight-color', '#46B065');
+                    root.style.setProperty('--success-color', '#46B065');
+                    root.style.setProperty('--header-bg', 'linear-gradient(135deg, #8CB818, #46B065)');
+                    break;
+                    
+                case 'red':
+                    root.style.setProperty('--primary-bg', '#FFFAF6');
+                    root.style.setProperty('--primary-color', '#004132');
+                    root.style.setProperty('--accent-color', '#B60000');
+                    root.style.setProperty('--highlight-color', '#FFBF36');
+                    root.style.setProperty('--success-color', '#A3BD48');
+                    root.style.setProperty('--header-bg', 'linear-gradient(135deg, #B60000, #FFBF36)');
+                    break;
+            }
+            
+            // 更新背景装饰
+            updateBackgroundDecorations(scheme);
+        }
+
+        // 更新背景装饰
+        function updateBackgroundDecorations(scheme) {
+            const circles = document.querySelectorAll('.bg-decoration');
+            
+            if (scheme === 'blue') {
+                circles[0].style.background = 'linear-gradient(135deg, #0068BA, #00A8E9)';
+                circles[1].style.background = 'linear-gradient(135deg, #91D5F1, #CFDFEF)';
+                circles[2].style.background = 'linear-gradient(135deg, #F1BB3E, #FFBF36)';
+            } else if (scheme === 'warm') {
+                circles[0].style.background = 'linear-gradient(135deg, #ED5E46, #E6A350)';
+                circles[1].style.background = 'linear-gradient(135deg, #EAC889, #FFF7E9)';
+                circles[2].style.background = 'linear-gradient(135deg, #7D3A18, #ED5E46)';
+            } else if (scheme === 'green') {
+                circles[0].style.background = 'linear-gradient(135deg, #8CB818, #46B065)';
+                circles[1].style.background = 'linear-gradient(135deg, #FADF2E, #DOEBB7)';
+                circles[2].style.background = 'linear-gradient(135deg, #004132, #8CB818)';
+            } else if (scheme === 'red') {
+                circles[0].style.background = 'linear-gradient(135deg, #B60000, #EC0000)';
+                circles[1].style.background = 'linear-gradient(135deg, #FEE9DC, #FCEBA3)';
+                circles[2].style.background = 'linear-gradient(135deg, #F8C05A, #A3BD48)';
+            }
+        }
+
+        // 初始化页面
+        window.addEventListener('DOMContentLoaded', function() {
+            initSubjects();
+            
+            // 尝试从本地存储加载保存的记录
+            const savedRecord = localStorage.getItem('rebornerExamRecord');
+            if (savedRecord) {
+                try {
+                    const record = JSON.parse(savedRecord);
+                    if (confirm('检测到已保存的记录，是否加载？')) {
+                        studentName = record.studentName || studentName;
+                        subjects = record.subjects || subjects;
+                        colorScheme = record.colorScheme || colorScheme;
+                        
+                        document.getElementById('studentName').textContent = studentName;
+                        applyColorScheme(colorScheme);
+                        
+                        // 更新颜色选择器
+                        document.querySelectorAll('.color-option').forEach(opt => {
+                            opt.classList.remove('selected');
+                            if (opt.dataset.scheme === colorScheme) {
+                                opt.classList.add('selected');
+                            }
+                        });
+                        
+                        renderScoreOverview();
+                        renderSubjectCards();
+                    }
+                } catch(e) {
+                    console.error('加载保存的记录时出错:', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
